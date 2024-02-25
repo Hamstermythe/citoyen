@@ -43,7 +43,7 @@
                 xhr.open("POST", "https://localhost:8080/auth", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 //ajouter le cookie nommé seesion
-                
+
                 xhr.send("identifiant=" + identifiant + "&motDePasse=" + motDePasse);
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4 && xhr.status === 200) {
@@ -57,7 +57,7 @@
     <div id="consommation" style="width: 400px; height: 800px; display: flex; flex-direction: column; justify-content: space-around; align-items: center; border: solid; border-width: 1px; border-radius: 4px;">
         <div id="calculator" style="border: solid; border-width: 1px; border-radius: 3px;">
             <h2>Calculateur</h2>
-            <form id="formConso" action="https://localhost:8080/calc" method="post">
+            <form id="formConso" action="https://localhost:8080/Calc" method="post">
                 <div>
                     <label for="type de consommation">Type de produit acheté:</label>
                     <select name="type de consommation" id="type de consommation">
@@ -220,7 +220,7 @@
                 <div>
                     <label for="poste">Poste:</label>
                     <select name="poste" id="poste">
-                        <option value="maire">Citoyen</option>
+                        <option value="maire">Maire</option>
                         <option value="député">Député</option>
                         <option value="sénateur">Sénateur</option>
                         <option value="président">Président</option>
@@ -242,12 +242,17 @@
     </div>
     <script>
         function presenterArticle() {
-            document.getElementById("consommation").style.display = "none";
-            document.getElementById("presenterArticle").style.display = "block";
-            document.getElementById("presenterRevision").style.display = "none";
-            document.getElementById("presenterAbrogation").style.display = "none";
-            document.getElementById("sePresenter").style.display = "none";
-            document.getElementById("presenterQuelquun").style.display = "none";
+            var doc =document.getElementById("consommation");
+            doc.style.display = "none";
+            doc = document.getElementById("presenterArticle");
+            doc.style.display = "flex";
+            doc = document.getElementById("presenterRevision");
+            doc.style.display = "none";
+            doc = document.getElementById("presenterAbrogation");
+            doc.style.display = "none";
+            doc = document.getElementById("sePresenter");
+            doc.style.display = "none";
+            doc = document.getElementById("presenterQuelquun");
         }
         function presenterRévision() {
             document.getElementById("consommation").style.display = "none";

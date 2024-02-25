@@ -37,9 +37,9 @@ var (
 )
 
 var (
-	page       = template.Must(template.New("page").ParseFiles("page.html")) // header  = template.Must(template.New("header").ParseFiles("header.html"))
-	calculator = template.Must(template.New("calculator").ParseFiles("calculator.html"))
-	connexion  = template.Must(template.New("connexion").ParseFiles("connexion.html"))
+	page       = template.Must(template.New("page").ParseFiles("template/page.html")) // header  = template.Must(template.New("header").ParseFiles("header.html"))
+	calculator = template.Must(template.New("calculator").ParseFiles("template/calculator.html"))
+	connexion  = template.Must(template.New("connexion").ParseFiles("template/connexion.html"))
 )
 var users = make(map[string]*User)
 
