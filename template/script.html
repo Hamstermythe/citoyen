@@ -1,0 +1,56 @@
+<div id="script">
+    <script id="script rubrique">
+        var deroulant = document.getElementsByClassName("deroulant");
+        var derouler = document.getElementsByClassName("derouler");
+        deroulant[0].addEventListener("click", function() {
+            if (derouler[0].style.display === "none") {
+                for (var i = 0; i < derouler.length; i++) {
+                    derouler[i].style.display = "flex";
+                }
+            } else {
+                for (var i = 0; i < derouler.length; i++) {
+                    derouler[i].style.display = "none";
+                }
+            }
+        });
+    </script>
+    <script id="script calculateur">
+        var consoType = document.getElementById("type de consommation");
+        var consoPoids = document.getElementById("quantité poids");
+        var consoHeures = document.getElementById("quantité heures");
+        var consoMinutes = document.getElementById("quantité minutes");
+        consoType.addEventListener("change", function() {
+            if (consoType.value === "alimentaire") {
+                consoPoids.style.display = "flex";
+                consoHeures.style.display = "none";
+                consoMinutes.style.display = "none";
+            } else if (consoType.value === "consommables") {
+                consoPoids.style.display = "flex";
+                consoHeures.style.display = "none";
+                consoMinutes.style.display = "none";
+            } else if (consoType.value === "services") {
+                consoPoids.style.display = "none";
+                consoHeures.style.display = "flex";
+                consoMinutes.style.display = "flex";
+            }
+        });
+    </script>
+    <script id="script body">
+        var body = document.getElementsByTagName("body");
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        body.style = "width: " + width + "px; min-height: " + height + "px;";
+        body.addEventListener("resize", function() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            body.style = "width: " + width + "px; min-height: " + height + "px;";
+        });
+        body.addEventListener("click", function() {
+            if (derouler !== undefined) {
+                for (var i = 0; i < derouler.length; i++) {
+                    derouler[i].style.display = "none";
+                }
+            }
+        });
+    </script>
+</div>

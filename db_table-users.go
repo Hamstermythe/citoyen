@@ -108,7 +108,7 @@ func genRandomPassword() string {
 	return string(randomPassword)
 }
 
-func dbUpdateConsommation(id string, primaire string, secondaire string, tertiaire string, quatiaire string) {
+func dbUpdateConsommation(id string, primaire int, secondaire int, tertiaire int, quatiaire int) {
 	// requête SQL pour mettre à jour les données de consommation de l'utilisateur
 	_, err := db.Exec("UPDATE users SET primaire = ?, secondaire = ?, tertiaire = ?, quatiaire = ? WHERE username = ?", primaire, secondaire, tertiaire, quatiaire, id)
 	if err != nil {

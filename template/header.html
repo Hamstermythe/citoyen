@@ -1,0 +1,377 @@
+<div>
+    <div>
+        <h1>Citoyen</h1>
+        <div>
+            <ul style="list-style: none;">
+                <li id="deroulant" style="display: flex;"><img src="https://localhost:8080/image/deroulant.png" style="width: 15%; height: 100%;">Rubrique</li>
+                <li class="derouler" style="display: none;"><button onclick="presenterArticle()">Présenter un article</button></li>
+                <li class="derouler" style="display: none;"><button onclick="presenterRévision()">Présenter une révision</button></li>
+                <li class="derouler" style="display: none;"><button onclick="presenterAbrogation()">Présenter une abrogation</button></li>
+                <li class="derouler" style="display: none;"><button onclick="sePresenter()">Se présenter</button></li>
+                <li class="derouler" style="display: none;"><button onclick="presenterQuelquun()">Proposer quelqu'un</button></li>
+            </ul>
+        </div>
+        <div>
+            <ul style="list-style: none;">
+                {{if eq .Usernme ""}}
+                <li id="connexion" style="display: flex;"><img src="https://localhost:8080/image/deroulant.png" style="width: 15%; height: 100%;">Connexion</li>
+                <li id="connecter">
+                    <form id="formConnexion" action="https://localhost:8080/connexion" method="post">
+                        <div>
+                            <label for="identifiant">Identifiant:</label>
+                            <input type="text" name="identifiant" id="identifiant">
+                        </div>
+                        <div>
+                            <label for="mot de passe">Mot de passe:</label>
+                            <input type="password" name="mot de passe" id="mot de passe">
+                        </div>
+                        <div>
+                            <button>connexion</button>
+                            <button>inscription</button>
+                        </div>
+                    </form>
+                </li>
+                {{else}}
+                <li id="connexion" style="display: none;"><img src="https://localhost:8080/image/deroulant.png" style="width: 15%; height: 100%;">{{.Username}}</li>
+                <li class="connecter" style="display: none;"><button onclick="maConsommation()">Ma consommation</button></li>
+                {{end}}
+                <li class="deconnexion" style="display: none;"><button onclick="deconnexion()">Déconnexion</button></li>
+            </ul>
+        </div>
+        <script>
+            var formConnexion = document.getElementById("formConnexion");
+            formConnexion.addEventListener("submit", function(event) {
+                event.preventDefault();
+                var identifiant = document.getElementById("identifiant").value;
+                var motDePasse = document.getElementById("mot de passe").value;
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "https://localhost:8080/connexion", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.send("identifiant=" + identifiant + "&motDePasse=" + motDePasse);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var reponse = JSON.parse(xhr.responseText);
+                        if (reponse.erreur === "") {
+                            document.getElementById("connexion").textContent = reponse.username;
+                            document.getElementById("connecter").textContent = '<button onclick="maConsommation()">Ma consommation</button>';
+
+                        } else {
+                            alert(reponse.erreur);
+                        }
+                    }
+                };
+            });
+        </script>
+    </div>
+    <div id="consommation" style="width: 400px; height: 800px; display: flex; flex-direction: column; justify-content: space-around; align-items: center; border: solid; border-width: 1px; border-radius: 4px;">
+        <div id="calculator" style="border: solid; border-width: 1px; border-radius: 3px;">
+            <h2>Calculateur</h2>
+            <form id="formConso" action="https://localhost:8080/calcHandler" method="post">
+                <div>
+                    <label for="type de consommation">Type de produit acheté:</label>
+                    <select name="type de consommation" id="type de consommation">
+                        <option value="alimentaire">Alimentaires</option>
+                        <option value="consommables">Consommables</option>
+                        <option value="services">Services</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="quantité achetée">Quantité achetée:</label>
+                    <input type="number" name="quantité poids" id="quantité poids" placeholder="grammes" max="1000000000">
+                    <input type="number" name="quantité heures" id="quantité heures" placeholder="heures" max="1000">
+                    <input type="number" name="quantité minutes" id="quantité minutes" placeholder="minutes" max="59">
+                </div>
+                <div id="valider">
+                    <input type="submit" value="Calculer">
+                </div>
+            </form>
+        </div>
+        <div id="resultat" style="border: solid; border-width: 1px; border-radius: 3px;">
+            <div id="primaire">
+                secteur primaire: {{.Primaire}}
+            </div>
+            <div id="secondaire">
+                secteur secondaire: {{.Secondaire}}
+            </div>
+            <div id="tertiaire">
+                secteur tertiaire: {{.Tertiaire}}
+            </div>
+            <div id="quatiaire">
+                secteur quatiaire: {{.Quatiaire}}
+            </div>
+        </div>
+        <div id="global" style="border: solid; border-width: 1px; border-radius: 3px;">
+            <h2>Nombre total d'heure de travail lié à votre consommation</h2>
+            <div id="total primaire">
+                secteur primaire: {{.TotalPrimaire}}
+            </div>
+            <div id="total secondaire">
+                secteur secondaire: {{.TotalSecondaire}}
+            </div>
+            <div id="total tertiaire">
+                secteur tertiaire: {{.TotalTertiaire}}
+            </div>
+            <div id="total quatiaire">
+                secteur quatiaire: {{.TotalQuatiaire}}
+            </div>
+        </div>
+        <script>
+            var formConso = document.querySelector("#formConso");
+            formConso.addEventListener("submit", function(event) {
+                event.preventDefault();
+                var formData = new FormData(formConso);
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", formConso.action, true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var result = JSON.parse(xhr.responseText);
+                        document.querySelector("#primaire").textContent = "secteur primaire: " + result.Primaire;
+                        document.querySelector("#secondaire").textContent = "secteur secondaire: " + result.Secondaire;
+                        document.querySelector("#tertiaire").textContent = "secteur tertiaire: " + result.Tertiaire;
+                        document.querySelector("#quatiaire").textContent = "secteur quatiaire: " + result.Quatiaire;
+                        document.querySelector("#total primaire").textContent = "secteur primaire: " + result.TotalPrimaire;
+                        document.querySelector("#total secondaire").textContent = "secteur secondaire: " + result.TotalSecondaire;
+                        document.querySelector("#total tertiaire").textContent = "secteur tertiaire: " + result.TotalTertiaire;
+                        document.querySelector("#total quatiaire").textContent = "secteur quatiaire: " + result.TotalQuatiaire;
+                    }
+                };
+                xhr.send(formData);
+            });
+        </script>
+    </div>
+    <div>
+        <div id="presenterArticle" style="display: flex; flex-direction: column;">
+            <h2>Présenter un article</h2>
+            <form action="https://localhost:8080/articleHandler" method="post">
+                <div>
+                    <label for="titre">Titre:</label>
+                    <input type="text" name="titre" id="titre" placeholder="Titre">
+                </div>
+                <div>
+                    <label for="contenu">Contenu:</label>
+                    <textarea name="contenu" id="contenu" placeholder="Contenu"></textarea>
+                </div>
+                <div>
+                    <input type="submit" value="Présenter">
+                </div>
+            </form>
+        </div>
+        <div id="presenterRevision" style="display: flex; flex-direction: column;">
+            <h2>Présenter une révision</h2>
+            <form action="https://localhost:8080/révisionHandler" method="post">
+                <div>
+                    <label for="titre">Titre:</label>
+                    <input type="text" name="titre" id="titre" placeholder="Titre">
+                </div>
+                <div>
+                    <label for="article">Article concerné:</label>
+                    <input type="text" name="article" id="article" placeholder="Article">
+                </div>
+                <div>
+                    <label for="contenu">Contenu:</label>
+                    <textarea name="contenu" id="contenu" placeholder="Contenu"></textarea>
+                </div>
+                <div>
+                    <input type="submit" value="Présenter">
+                </div>
+            </form>
+        </div>
+        <div id="presenterAbrogation" style="display: flex; flex-direction: column;">
+            <h2>Présenter une abrogation</h2>
+            <form action="https://localhost:8080/abrogationHandler" method="post">
+                <div>
+                    <label for="titre">Titre:</label>
+                    <input type="text" name="titre" id="titre" placeholder="Titre">
+                </div>
+                <div>
+                    <label for="article">Article concerné:</label>
+                    <input type="text" name="article" id="article" placeholder="Article">
+                </div>
+                <div>
+                    <label for="contenu">Contenu:</label>
+                    <textarea name="contenu" id="contenu" placeholder="Contenu"></textarea>
+                </div>
+                <div>
+                    <input type="submit" value="Présenter">
+                </div>
+            </form>
+        </div>
+        <div id="sePresenter" style="display: flex; flex-direction: column;">
+            <h2>Se présenter</h2>
+            <form action="https://localhost:8080/présentationHandler" method="post">
+                <div>
+                    <label for="poste">Poste:</label>
+                    <select name="poste" id="poste">
+                        <option value="maire">Citoyen</option>
+                        <option value="député">Député</option>
+                        <option value="sénateur">Sénateur</option>
+                        <option value="président">Président</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="contenu">Contenu:</label>
+                    <input type="text" name="contenu" placeholder="contenu">
+                </div>
+                <div>
+                    <label for="vidéo">Enregistrer une vidéo de présentation</label>
+                    <input type="file" name="vidéo" id="vidéo">
+                </div>
+                <div>
+                    <input type="submit" value="Se présenter">
+                </div>
+            </form>
+        </div>
+        <div id="presenterQuelquun" style="display: flex; flex-direction: column;">
+            <h2>Proposer quelqu'un</h2>
+            <form action="https://localhost:8080/propositionHandler" method="post">
+                <div>
+                    <label for="nom">Nom:</label>
+                    <input type="text" name="nom" id="nom" placeholder="Nom">
+                </div>
+                <div>
+                    <label for="prénom">Prénom:</label>
+                    <input type="text" name="prénom" id="prénom" placeholder="Prénom">
+                </div>
+                <div>
+                    <label for="poste">Poste:</label>
+                    <select name="poste" id="poste">
+                        <option value="maire">Citoyen</option>
+                        <option value="député">Député</option>
+                        <option value="sénateur">Sénateur</option>
+                        <option value="président">Président</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="contenu">Contenu:</label>
+                    <input type="text" name="contenu" placeholder="contenu">
+                </div>
+                <div>
+                    <label for="vidéo">Enregistrer une vidéo de présentation</label>
+                    <input type="file" name="vidéo" id="vidéo">
+                </div>
+                <div>
+                    <input type="submit" value="Proposer">
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        function presenterArticle() {
+            document.getElementById("consommation").style.display = "none";
+            document.getElementById("presenterArticle").style.display = "block";
+            document.getElementById("presenterRevision").style.display = "none";
+            document.getElementById("presenterAbrogation").style.display = "none";
+            document.getElementById("sePresenter").style.display = "none";
+            document.getElementById("presenterQuelquun").style.display = "none";
+        }
+        function presenterRévision() {
+            document.getElementById("consommation").style.display = "none";
+            document.getElementById("presenterArticle").style.display = "none";
+            document.getElementById("presenterRevision").style.display = "block";
+            document.getElementById("presenterAbrogation").style.display = "none";
+            document.getElementById("sePresenter").style.display = "none";
+            document.getElementById("presenterQuelquun").style.display = "none";
+        }
+        function presenterAbrogation() {
+            document.getElementById("consommation").style.display = "none";
+            document.getElementById("presenterArticle").style.display = "none";
+            document.getElementById("presenterRevision").style.display = "none";
+            document.getElementById("presenterAbrogation").style.display = "block";
+            document.getElementById("sePresenter").style.display = "none";
+            document.getElementById("presenterQuelquun").style.display = "none";
+        }
+        function sePresenter() {
+            document.getElementById("consommation").style.display = "none";
+            document.getElementById("presenterArticle").style.display = "none";
+            document.getElementById("presenterRevision").style.display = "none";
+            document.getElementById("presenterAbrogation").style.display = "none";
+            document.getElementById("sePresenter").style.display = "block";
+            document.getElementById("presenterQuelquun").style.display = "none";
+        }
+        function presenterQuelquun() {
+            document.getElementById("consommation").style.display = "none";
+            document.getElementById("presenterArticle").style.display = "none";
+            document.getElementById("presenterRevision").style.display = "none";
+            document.getElementById("presenterAbrogation").style.display = "none";
+            document.getElementById("sePresenter").style.display = "none";
+            document.getElementById("presenterQuelquun").style.display = "block";
+        }
+        function consommation() {
+            document.getElementById("consommation").style.display = "block";
+            document.getElementById("presenterArticle").style.display = "none";
+            document.getElementById("presenterRevision").style.display = "none";
+            document.getElementById("presenterAbrogation").style.display = "none";
+            document.getElementById("sePresenter").style.display = "none";
+            document.getElementById("presenterQuelquun").style.display = "none";
+        }
+    </script>
+    <script>
+        var connexion = document.getElementById("connexion");
+        var connecter = document.getElementById("connecter");
+        var deconnexion = document.getElementById("deconnexion");
+        connexion.addEventListener("click", function() {
+            if (connecter.style.display === "none") {
+                connecter.style.display = "block";
+                deconnexion.style.display = "none";
+            } else {
+                connecter.style.display = "none";
+                deconnexion.style.display = "block";
+            }
+        });
+    </script>
+    <script id="script rubrique">
+        var deroulant = document.getElementsById("deroulant");
+        var derouler = document.getElementsByClassName("derouler");
+        deroulant.addEventListener("click", function() {
+            if (derouler[0].style.display === "none") {
+                for (var i = 0; i < derouler.length; i++) {
+                    derouler[i].style.display = "flex";
+                }
+            } else {
+                for (var i = 0; i < derouler.length; i++) {
+                    derouler[i].style.display = "none";
+                }
+            }
+        });
+    </script>
+    <script id="script calculateur">
+        var consoType = document.getElementById("type de consommation");
+        var consoPoids = document.getElementById("quantité poids");
+        var consoHeures = document.getElementById("quantité heures");
+        var consoMinutes = document.getElementById("quantité minutes");
+        consoType.addEventListener("change", function() {
+            if (consoType.value === "alimentaire") {
+                consoPoids.style.display = "flex";
+                consoHeures.style.display = "none";
+                consoMinutes.style.display = "none";
+            } else if (consoType.value === "consommables") {
+                consoPoids.style.display = "flex";
+                consoHeures.style.display = "none";
+                consoMinutes.style.display = "none";
+            } else if (consoType.value === "services") {
+                consoPoids.style.display = "none";
+                consoHeures.style.display = "flex";
+                consoMinutes.style.display = "flex";
+            }
+        });
+    </script>
+    <script id="script body">
+        var body = document.getElementsByTagName("body");
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        body.style = "width: " + width + "px; min-height: " + height + "px;";
+        body.addEventListener("resize", function() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            body.style = "width: " + width + "px; min-height: " + height + "px;";
+        });
+        body.addEventListener("click", function() {
+            if (derouler !== undefined) {
+                for (var i = 0; i < derouler.length; i++) {
+                    derouler[i].style.display = "none";
+                }
+            }
+        });
+    </script>
+</div>
