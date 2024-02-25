@@ -37,16 +37,16 @@ var (
 )
 
 var (
-	header  = template.Must(template.New("header").ParseFiles("header.html"))
-	accueil = template.Must(template.New("accueil").ParseFiles("accueil.html"))
-	script  = template.Must(template.New("script").ParseFiles("script.html"))
+	page       = template.Must(template.New("page").ParseFiles("page.html")) // header  = template.Must(template.New("header").ParseFiles("header.html"))
+	calculator = template.Must(template.New("calculator").ParseFiles("calculator.html"))
+	connexion  = template.Must(template.New("connexion").ParseFiles("connexion.html"))
 )
-
 var users = make(map[string]*User)
 
 func MakeAuthServer(addr string, port string, sizer int) *http.Server {
 	router := mux.NewRouter()
 	router.Handle("/image/", http.StripPrefix("/image/", http.FileServer(http.Dir("image/"))))
+	router.HandleFunc("/", accueilHandler)
 	router.HandleFunc("/Auth", authHandler)
 	router.HandleFunc("/Calc", calcHandler)
 	// router.HandleFunc("/SaveCalc", saveCalcHandler)

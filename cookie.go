@@ -35,6 +35,8 @@ func setCookie(w http.ResponseWriter, username, uuid string) {
 		Value:    encryptId, // encrypt(username, uuid),
 		HttpOnly: true,
 	}
+	cookie.SameSite = http.SameSiteNoneMode
+	cookie.Secure = true
 	// ajouter le cookie dans la réponse
 	http.SetCookie(w, &cookie)
 }

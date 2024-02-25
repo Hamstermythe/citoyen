@@ -11,9 +11,8 @@
                 <li class="derouler" style="display: none;"><button onclick="presenterQuelquun()">Proposer quelqu'un</button></li>
             </ul>
         </div>
-        <div>
+        <div id="connecteur">
             <ul style="list-style: none;">
-                {{if eq .Usernme ""}}
                 <li id="connexion" style="display: flex;"><img src="https://localhost:8080/image/deroulant.png" style="width: 15%; height: 100%;">Connexion</li>
                 <li id="connecter">
                     <form id="formConnexion" action="https://localhost:8080/connexion" method="post">
@@ -26,15 +25,11 @@
                             <input type="password" name="mot de passe" id="mot de passe">
                         </div>
                         <div>
-                            <button>connexion</button>
-                            <button>inscription</button>
+                            <button type="submit">connexion</button>
+                            <button type="submit">inscription</button>
                         </div>
                     </form>
                 </li>
-                {{else}}
-                <li id="connexion" style="display: none;"><img src="https://localhost:8080/image/deroulant.png" style="width: 15%; height: 100%;">{{.Username}}</li>
-                <li class="connecter" style="display: none;"><button onclick="maConsommation()">Ma consommation</button></li>
-                {{end}}
                 <li class="deconnexion" style="display: none;"><button onclick="deconnexion()">Déconnexion</button></li>
             </ul>
         </div>
@@ -45,19 +40,15 @@
                 var identifiant = document.getElementById("identifiant").value;
                 var motDePasse = document.getElementById("mot de passe").value;
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", "https://localhost:8080/connexion", true);
+                xhr.open("POST", "https://localhost:8080/auth", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                //ajouter le cookie nommé seesion
+                
                 xhr.send("identifiant=" + identifiant + "&motDePasse=" + motDePasse);
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4 && xhr.status === 200) {
-                        var reponse = JSON.parse(xhr.responseText);
-                        if (reponse.erreur === "") {
-                            document.getElementById("connexion").textContent = reponse.username;
-                            document.getElementById("connecter").textContent = '<button onclick="maConsommation()">Ma consommation</button>';
-
-                        } else {
-                            alert(reponse.erreur);
-                        }
+                        var connecteur = document.getElementById("connecteur");
+                        connecteur.innerHTML = reponse.responseText;
                     }
                 };
             });
@@ -66,7 +57,7 @@
     <div id="consommation" style="width: 400px; height: 800px; display: flex; flex-direction: column; justify-content: space-around; align-items: center; border: solid; border-width: 1px; border-radius: 4px;">
         <div id="calculator" style="border: solid; border-width: 1px; border-radius: 3px;">
             <h2>Calculateur</h2>
-            <form id="formConso" action="https://localhost:8080/calcHandler" method="post">
+            <form id="formConso" action="https://localhost:8080/calc" method="post">
                 <div>
                     <label for="type de consommation">Type de produit acheté:</label>
                     <select name="type de consommation" id="type de consommation">
@@ -125,15 +116,8 @@
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4 && xhr.status === 200) {
-                        var result = JSON.parse(xhr.responseText);
-                        document.querySelector("#primaire").textContent = "secteur primaire: " + result.Primaire;
-                        document.querySelector("#secondaire").textContent = "secteur secondaire: " + result.Secondaire;
-                        document.querySelector("#tertiaire").textContent = "secteur tertiaire: " + result.Tertiaire;
-                        document.querySelector("#quatiaire").textContent = "secteur quatiaire: " + result.Quatiaire;
-                        document.querySelector("#total primaire").textContent = "secteur primaire: " + result.TotalPrimaire;
-                        document.querySelector("#total secondaire").textContent = "secteur secondaire: " + result.TotalSecondaire;
-                        document.querySelector("#total tertiaire").textContent = "secteur tertiaire: " + result.TotalTertiaire;
-                        document.querySelector("#total quatiaire").textContent = "secteur quatiaire: " + result.TotalQuatiaire;
+                        var consommation = document.getElementById("consommation");
+                        consommation.innerHTML = xhr.responseText;
                     }
                 };
                 xhr.send(formData);

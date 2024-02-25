@@ -10,6 +10,10 @@ import (
 	"github.com/google/uuid"
 )
 
+func accueilHandler(w http.ResponseWriter, r *http.Request) {
+	execPage(w)
+}
+
 func authHandler(w http.ResponseWriter, r *http.Request) {
 	// lire le formulaire reçu contenant les identifiants id et mdp
 	r.ParseForm()
@@ -23,7 +27,7 @@ func authHandler(w http.ResponseWriter, r *http.Request) {
 		user.UUID = uuid.New().String()
 		setCookie(w, user.Username, user.UUID)
 		users[user.UUID] = &user
-		err := accueil.ExecuteTemplate(w, "accueil.html", userData)
+		err := connexion.ExecuteTemplate(w, "connexion.html", userData)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -41,6 +45,10 @@ func calcHandler(w http.ResponseWriter, r *http.Request) {
 	// la quantité est en grammes pour les aliments et les consommables
 	// la quantité est en heures pour les services
 	// var userData Accueil
+	var durationPrimaire time.Duration
+	var durationSecondaire time.Duration
+	var durationTertiaire time.Duration
+	var durationQuatiaire time.Duration
 	if tipe == "alimentaire" {
 		quantite, err := strconv.ParseFloat(strings.TrimSpace(r.FormValue("quantite poids")), 64)
 		if err != nil {
@@ -56,22 +64,10 @@ func calcHandler(w http.ResponseWriter, r *http.Request) {
 		quantitySecondaire := quantite * 0.2
 		quantityTertiaire := quantite * 0.2
 		quantityQuatiaire := quantite * 0.2
-		durationPrimaire := time.Duration(time.Second * time.Duration(quantityPrimaire) * 120)
-		durationSecondaire := time.Duration(time.Second * time.Duration(quantitySecondaire) * 120)
-		durationTertiaire := time.Duration(time.Second * time.Duration(quantityTertiaire) * 120)
-		durationQuatiaire := time.Duration(time.Second * time.Duration(quantityQuatiaire) * 120)
-		var queredUserData Accueil
-		if user, ok := users[uuid]; ok {
-			if user.Username != username {
-				dbUpdateConsommation(username, int(durationPrimaire), int(durationSecondaire), int(durationTertiaire), int(durationQuatiaire))
-				queredUserData = dbGetUserData(username)
-			}
-		}
-		queredUserData.Primaire = durationToHourMinSec(durationPrimaire)
-		queredUserData.Secondaire = durationToHourMinSec(durationSecondaire)
-		queredUserData.Tertiaire = durationToHourMinSec(durationTertiaire)
-		queredUserData.Quatiaire = durationToHourMinSec(durationQuatiaire)
-		accueilTemplate(w, queredUserData)
+		durationPrimaire = time.Duration(time.Second * time.Duration(quantityPrimaire) * 120)
+		durationSecondaire = time.Duration(time.Second * time.Duration(quantitySecondaire) * 120)
+		durationTertiaire = time.Duration(time.Second * time.Duration(quantityTertiaire) * 120)
+		durationQuatiaire = time.Duration(time.Second * time.Duration(quantityQuatiaire) * 120)
 	} else if tipe == "consommable" {
 		quantite, err := strconv.ParseFloat(strings.TrimSpace(r.FormValue("quantité poids")), 64)
 		if err != nil {
@@ -87,22 +83,10 @@ func calcHandler(w http.ResponseWriter, r *http.Request) {
 		quantitySecondaire := quantite * 0.2
 		quantityTertiaire := quantite * 0.1
 		quantityQuatiaire := quantite * 0.2
-		durationPrimaire := time.Duration(time.Second * time.Duration(quantityPrimaire) * 240)
-		durationSecondaire := time.Duration(time.Second * time.Duration(quantitySecondaire) * 240)
-		durationTertiaire := time.Duration(time.Second * time.Duration(quantityTertiaire) * 240)
-		durationQuatiaire := time.Duration(time.Second * time.Duration(quantityQuatiaire) * 240)
-		var queredUserData Accueil
-		if user, ok := users[uuid]; ok {
-			if user.Username != username {
-				dbUpdateConsommation(username, int(durationPrimaire), int(durationSecondaire), int(durationTertiaire), int(durationQuatiaire))
-				queredUserData = dbGetUserData(username)
-			}
-		}
-		queredUserData.Primaire = durationToHourMinSec(durationPrimaire)
-		queredUserData.Secondaire = durationToHourMinSec(durationSecondaire)
-		queredUserData.Tertiaire = durationToHourMinSec(durationTertiaire)
-		queredUserData.Quatiaire = durationToHourMinSec(durationQuatiaire)
-		accueilTemplate(w, queredUserData)
+		durationPrimaire = time.Duration(time.Second * time.Duration(quantityPrimaire) * 240)
+		durationSecondaire = time.Duration(time.Second * time.Duration(quantitySecondaire) * 240)
+		durationTertiaire = time.Duration(time.Second * time.Duration(quantityTertiaire) * 240)
+		durationQuatiaire = time.Duration(time.Second * time.Duration(quantityQuatiaire) * 240)
 	} else if tipe == "service" {
 		quantityHour, err := strconv.Atoi(r.FormValue("quantité heures"))
 		if err != nil {
@@ -117,22 +101,23 @@ func calcHandler(w http.ResponseWriter, r *http.Request) {
 		durationHour := time.Duration(time.Hour * time.Duration(quantityHour))
 		durationMinute := time.Duration(time.Minute * time.Duration(quantityMinute))
 		totDuration := durationHour + durationMinute
-		durationPrimaire := time.Duration(int(float64(totDuration) * 0.4))
-		durationSecondaire := time.Duration(int(float64(totDuration) * 0.1))
-		durationTertiaire := time.Duration(int(float64(totDuration) * 0.4))
-		durationQuatiaire := time.Duration(int(float64(totDuration) * 0.1))
-		var queredUserData Accueil
-		if user, ok := users[uuid]; ok {
-			if user.Username != username {
-				dbUpdateConsommation(username, int(durationPrimaire), int(durationSecondaire), int(durationTertiaire), int(durationQuatiaire))
-				queredUserData = dbGetUserData(username)
-			}
-		}
-		queredUserData.Primaire = durationToHourMinSec(durationPrimaire)
-		queredUserData.Secondaire = durationToHourMinSec(durationSecondaire)
-		queredUserData.Tertiaire = durationToHourMinSec(durationTertiaire)
-		accueilTemplate(w, queredUserData)
+		durationPrimaire = time.Duration(int(float64(totDuration) * 0.4))
+		durationSecondaire = time.Duration(int(float64(totDuration) * 0.1))
+		durationTertiaire = time.Duration(int(float64(totDuration) * 0.4))
+		durationQuatiaire = time.Duration(int(float64(totDuration) * 0.1))
 	}
+	var queredUserData Accueil
+	if user, ok := users[uuid]; ok {
+		if user.Username != username {
+			dbUpdateConsommation(username, int(durationPrimaire), int(durationSecondaire), int(durationTertiaire), int(durationQuatiaire))
+			queredUserData = dbGetUserData(username)
+		}
+	}
+	queredUserData.Primaire = durationToHourMinSec(durationPrimaire)
+	queredUserData.Secondaire = durationToHourMinSec(durationSecondaire)
+	queredUserData.Tertiaire = durationToHourMinSec(durationTertiaire)
+	queredUserData.Quatiaire = durationToHourMinSec(durationQuatiaire)
+	execCalculator(w, queredUserData)
 	fmt.Fprint(w, "Données calculées")
 }
 
@@ -145,17 +130,16 @@ func durationToHourMinSec(duree time.Duration) string {
 	return strconv.Itoa(int(hoursPrimaire)) + ":" + strconv.Itoa(int(minutesPrimaire)) + ":" + strconv.Itoa(int(secondsPrimaire))
 }
 
-func accueilTemplate(w http.ResponseWriter, userData Accueil) {
-	err := header.ExecuteTemplate(w, "header.html", userData)
+func execPage(w http.ResponseWriter) {
+	err := page.ExecuteTemplate(w, "page.html", nil)
 	if err != nil {
-		fmt.Println("error to execute header.html")
+		fmt.Println("error to execute page.html")
 	}
-	err = accueil.ExecuteTemplate(w, "accueil.html", userData)
+}
+
+func execCalculator(w http.ResponseWriter, userData Accueil) {
+	err := calculator.ExecuteTemplate(w, "calculator.html", nil)
 	if err != nil {
-		fmt.Println("error to execute accueil.html")
-	}
-	err = script.ExecuteTemplate(w, "script.html", nil)
-	if err != nil {
-		fmt.Println("error to execute script.html")
+		fmt.Println("error to execute calcul.html")
 	}
 }
